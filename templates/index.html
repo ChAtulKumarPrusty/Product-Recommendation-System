@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Recommendation System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Global reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Background and body styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease;
+        }
+
+        /* Light and dark mode settings */
+        .light-mode {
+            background: linear-gradient(135deg, #e0e0e0, #f8f8f8);
+            color: #333;
+        }
+        .dark-mode {
+            background: linear-gradient(135deg, #1f1f1f, #333);
+            color: #eee;
+        }
+
+        /* Glassmorphism styling */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 90%;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideIn 1s forwards ease-out;
+            transition: background 0.5s ease;
+        }
+
+        /* Slide-in animation */
+        @keyframes slideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2em;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Label, input, select, button styling */
+        label, select, input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        /* Input and select box styles with icons */
+        input[type="text"], select, input[type="file"] {
+            padding: 0.75em 2em;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Button styling */
+        button {
+            background: linear-gradient(135deg, #4CAF50, #2C5364);
+            color: #fff;
+            padding: 0.75em;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background: linear-gradient(135deg, #2C5364, #4CAF50);
+            transform: scale(1.05);
+        }
+
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #4CAF50;
+            transition: color 0.3s ease;
+        }
+
+        /* Image preview */
+        #image_preview {
+            display: none;
+            margin-top: 1em;
+            text-align: center;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        #image_preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Dark mode toggle button -->
+    <div class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-adjust"></i>
+    </div>
+
+    <div class="form-container">
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <h1>Product Recommendation System</h1>
+
+            <label for="input_type">Select Input Type:</label>
+            <select name="input_type" id="input_type" required>
+                <option value="text">Text</option>
+                <option value="image">Image</option>
+            </select>
+
+            <div id="text_input">
+                <label for="query">Enter your query:</label>
+                <input type="text" name="query" id="query" placeholder="Type your product name or description">
+            </div>
+
+            <div id="image_input" style="display: none;">
+                <label for="image_file">Upload an image:</label>
+                <input type="file" name="image_file" id="image_file" accept="image/*">
+                <div id="image_preview">
+                    <p>Preview:</p>
+                    <img id="preview_img" src="" alt="Image Preview">
+                </div>
+            </div>
+
+            <button type="submit">Find Recommendations</button>
+        </form>
+    </div>
+
+    <script>
+        // Toggle between light and dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
+        }
+
+        // Handle form input display based on selected input type
+        document.getElementById('input_type').addEventListener('change', function() {
+            const textInput = document.getElementById('text_input');
+            const imageInput = document.getElementById('image_input');
+            if (this.value === 'text') {
+                textInput.style.display = 'block';
+                imageInput.style.display = 'none';
+            } else {
+                textInput.style.display = 'none';
+                imageInput.style.display = 'block';
+            }
+        });
+
+        // Display image preview on file upload
+        document.getElementById('image_file').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview_img').src = e.target.result;
+                    document.getElementById('image_preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
